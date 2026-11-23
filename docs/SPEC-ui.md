@@ -235,7 +235,7 @@ is rejected.
 | Register fields | `phone`, `name`, `password`, `role` (values `driver`, `shipper`, `carrier`) |
 | Login fields | `phone`, `password` |
 | Register success | `302` → `/auth/login` |
-| Login success | `302` → `/dashboard` + `access_token` HttpOnly cookie (unchanged) |
+| Login success | `303` → `/dashboard` + `access_token` HttpOnly cookie (ADR 004) |
 | Login failure | `401` (no cookie) |
 | Duplicate phone | `409` (no second user) |
 | Logout | `302` → `/auth/login`, cookie deleted |

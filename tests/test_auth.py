@@ -120,7 +120,8 @@ def test_login_success_sets_cookie():
             "/auth/login",
             data={"phone": phone, "password": PASSWORD},
         )
-        assert response.status_code in (302, 307), response.text
+        # 303 See Other is the post-login contract (ADR 004); 302/307 kept for compatibility.
+        assert response.status_code in (302, 303, 307), response.text
         assert response.headers.get("location") == "/dashboard"
 
         set_cookie = response.headers.get("set-cookie", "")

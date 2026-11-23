@@ -199,7 +199,7 @@ Status reflects the repository at the date of this document and does not weaken 
 | GET | `/auth/register` | Registration form | 200 HTML | — |
 | POST | `/auth/register` | Create user (`phone`, `name`, `password`, `role`) | 302 → `/auth/login` | 409 re-rendered form with accessible alert |
 | GET | `/auth/login` | Login form | 200 HTML | — |
-| POST | `/auth/login` | Authenticate (`phone`, `password`) | 302 → `/dashboard` + HttpOnly cookie | 401 re-rendered form with accessible alert |
+| POST | `/auth/login` | Authenticate (`phone`, `password`) | 303 → `/dashboard` + HttpOnly cookie (ADR 004) | 401 re-rendered form with accessible alert |
 | POST | `/auth/logout` | Clear session cookie | 302 → `/auth/login` | — |
 | GET | `/dashboard` | Authenticated landing page | 200 HTML | — |
 

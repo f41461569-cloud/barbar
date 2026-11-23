@@ -95,15 +95,15 @@ def login(
     token = create_access_token(
         {"sub": str(user.id), "phone": user.phone, "role": user.role.value}
     )
-    response = RedirectResponse(url="/dashboard", status_code=302)
-    response.set_cookie(
+    redirect_response = RedirectResponse(url="/dashboard", status_code=303)
+    redirect_response.set_cookie(
         key="access_token",
         value=token,
         httponly=True,
         samesite="lax",
         max_age=3600,
     )
-    return response
+    return redirect_response
 
 
 @router.post("/logout")

@@ -104,8 +104,9 @@ This work requires **no data-model change and no public-API change**, therefore 
   `tests/test_auth.py` and `tests/test_booking_concurrency.py` were not modified.
 - **TDD:** UI suite was confirmed RED first (old markup, missing Tailwind/font/alert), then GREEN after
   implementation.
-- **Visual QA (real Chrome, `browse`):** login/register/dashboard at 1366×633, 390×844, 360×800 and
-  320×568 — card 16 px from each edge, `scrollWidth == clientWidth` at every width (no horizontal scroll).
+- **Visual QA (real Chrome, `browse`):** login/register/dashboard at 1366×633, 1440×900, 390×844,
+  360×800 and 320×568 — card 16 px from each edge on phones, 448 px wide and centered at 1440 px,
+  `scrollWidth == clientWidth` at every width (no horizontal scroll).
 - **Login error state:** click submit with a wrong password → status 401, `role="alert"` +
   `aria-live="assertive"`, Persian message, phone preserved, password empty, `aria-invalid="true"`
   (verified visually and via the accessibility snapshot).

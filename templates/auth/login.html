@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}ورود — باربری هوشمند{% endblock %}
+
+{% block card %}
+<h1 class="mb-1 text-center text-2xl font-bold">ورود</h1>
+<p class="mb-6 text-center text-sm text-white/80">برای مدیریت بار و نوبت‌ها وارد شوید.</p>
+
+{% if error %}
+<div id="form-error" role="alert" aria-live="assertive"
+     class="mb-5 flex items-start gap-3 rounded-xl border border-red-300/40 bg-red-500/20 p-4 text-sm text-red-50">
+  <svg class="mt-0.5 h-5 w-5 shrink-0 text-red-200" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+       stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path>
+  </svg>
+  <p class="break-words leading-6">{{ error }}</p>
+</div>
+{% endif %}
+
+<form method="post" action="/auth/login" data-guard class="space-y-4">
+  <div>
+    <label for="phone" class="mb-2 block text-sm font-medium text-white/90">شماره تلفن</label>
+    <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="username"
+           dir="ltr" required placeholder="09xxxxxxxxx"
+           value="{{ phone|default('', true) }}"
+           {% if error %}aria-invalid="true" aria-describedby="form-error"{% endif %}
+           class="w-full rounded-xl border bg-white/10 px-4 py-3 text-left text-base text-white placeholder:text-white/60 focus:outline-none focus:border-white/60 focus:bg-white/15 focus:ring-2 focus:ring-white/70{% if error %} border-red-300/70{% else %} border-white/25{% endif %}">
+  </div>
+
+  <div>
+    <label for="password" class="mb-2 block text-sm font-medium text-white/90">رمز عبور</label>
+    <input id="password" name="password" type="password" autocomplete="current-password"
+           dir="ltr" required placeholder="••••••••"
+           {% if error %}aria-invalid="true" aria-describedby="form-error"{% endif %}
+           class="w-full rounded-xl border bg-white/10 px-4 py-3 text-left text-base text-white placeholder:text-white/60 focus:outline-none focus:border-white/60 focus:bg-white/15 focus:ring-2 focus:ring-white/70{% if error %} border-red-300/70{% else %} border-white/25{% endif %}">
+  </div>
+
+  <button type="submit" data-busy-text="در حال ورود…"
+          class="w-full rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 px-4 py-3 text-base font-bold text-white shadow-lg shadow-indigo-900/30 transition-all duration-200 hover:-translate-y-0.5 hover:from-blue-400 hover:to-purple-400 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-indigo-700 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transform-none motion-reduce:transition-none">
+    وارد شوید
+  </button>
+</form>
+{% endblock %}
+
+{% block footer %}
+<p class="mt-6 text-center text-sm text-white/80">
+  حساب ندارید؟
+  <a href="/auth/register"
+     class="rounded font-medium text-white underline decoration-white/50 underline-offset-4 hover:decoration-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80">ثبت نام کنید</a>
+</p>
+{% endblock %}

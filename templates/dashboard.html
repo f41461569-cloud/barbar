@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}داشبورد — باربری هوشمند{% endblock %}
+
+{% block card %}
+<h1 class="mb-1 text-center text-2xl font-bold">داشبورد</h1>
+<p class="mb-6 text-center text-sm text-white/90">به باربری هوشمند خوش آمدید.</p>
+
+<form method="post" action="/auth/logout">
+  <button type="submit"
+          class="w-full rounded-xl border border-red-300/40 bg-red-500/20 px-4 py-3 text-base font-bold text-red-50 shadow-lg shadow-indigo-900/20 transition-all duration-200 hover:bg-red-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-purple-700 active:translate-y-0 motion-reduce:transition-none">
+    خروج
+  </button>
+</form>
+{% endblock %}
+
+{% block footer %}{% endblock %}

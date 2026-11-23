@@ -1,5 +1,8 @@
-pgsql/
-pgdata/
 venv/
 __pycache__/
 *.pyc
+*.db
+pgdata/
+pgsql/
+.env
+*.log

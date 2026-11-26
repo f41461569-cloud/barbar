@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}ثبت بار جدید — باربری هوشمند{% endblock %}
+
+{% block main_class %}max-w-6xl{% endblock %}
+
+{% block card %}
+{% set input_class = "w-full rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-800 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500" %}
+
+<header>
+  <h1 class="text-2xl font-bold text-gray-800">ثبت بار جدید</h1>
+  <p class="mt-1 text-sm leading-6 text-gray-500">
+    مشخصات بار را وارد کنید تا رانندگان تأییدشده بتوانند آن را رزرو کنند.
+  </p>
+</header>
+
+{% if error %}
+<div role="alert" aria-live="assertive"
+     class="mt-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+  {{ error }}
+</div>
+{% endif %}
+
+<form method="post" action="/shipper/cargos/new" data-guard data-busy-text="در حال ثبت…"
+      class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+  <div class="sm:col-span-2">
+    <label for="title" class="mb-1 block text-sm font-medium text-gray-700">عنوان بار</label>
+    <input id="title" name="title" type="text" required minlength="3" maxlength="200"
+           value="{{ values.title }}"
+           {% if errors.get('title') %}aria-invalid="true"{% endif %}
+           class="{{ input_class }}">
+    {% if errors.get('title') %}<p class="mt-1 text-xs text-red-700">{{ errors.title }}</p>{% endif %}
+  </div>
+
+  <div>
+    <label for="origin" class="mb-1 block text-sm font-medium text-gray-700">مبدأ</label>
+    <input id="origin" name="origin" type="text" required minlength="2" maxlength="200"
+           value="{{ values.origin }}"
+           {% if errors.get('origin') %}aria-invalid="true"{% endif %}
+           class="{{ input_class }}">
+    {% if errors.get('origin') %}<p class="mt-1 text-xs text-red-700">{{ errors.origin }}</p>{% endif %}
+  </div>
+
+  <div>
+    <label for="destination" class="mb-1 block text-sm font-medium text-gray-700">مقصد</label>
+    <input id="destination" name="destination" type="text" required minlength="2" maxlength="200"
+           value="{{ values.destination }}"
+           {% if errors.get('destination') %}aria-invalid="true"{% endif %}
+           class="{{ input_class }}">
+    {% if errors.get('destination') %}<p class="mt-1 text-xs text-red-700">{{ errors.destination }}</p>{% endif %}
+  </div>
+
+  <div>
+    <label for="weight_kg" class="mb-1 block text-sm font-medium text-gray-700">وزن (کیلوگرم)</label>
+    <input id="weight_kg" name="weight_kg" type="number" required min="1" max="40000" step="any"
+           value="{{ values.weight_kg }}"
+           {% if errors.get('weight_kg') %}aria-invalid="true"{% endif %}
+           class="{{ input_class }}">
+    {% if errors.get('weight_kg') %}<p class="mt-1 text-xs text-red-700">{{ errors.weight_kg }}</p>{% endif %}
+  </div>
+
+  <div>
+    <label for="price" class="mb-1 block text-sm font-medium text-gray-700">قیمت (تومان)</label>
+    <input id="price" name="price" type="number" required min="1" max="1000000000000" step="any"
+           value="{{ values.price }}"
+           {% if errors.get('price') %}aria-invalid="true"{% endif %}
+           class="{{ input_class }}">
+    {% if errors.get('price') %}<p class="mt-1 text-xs text-red-700">{{ errors.price }}</p>{% endif %}
+  </div>
+
+  <div class="sm:col-span-2">
+    <button type="submit"
+            class="inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-violet-600 to-pink-600 px-4 py-3 text-base font-bold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-pink-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2 focus-visible:ring-offset-white active:translate-y-0 motion-reduce:transform-none motion-reduce:transition-none sm:w-auto">
+      ثبت بار
+    </button>
+  </div>
+</form>
+
+<a href="/shipper/cargos"
+   class="mt-6 inline-flex text-sm font-medium text-violet-700 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2">
+  بازگشت به بارهای من
+</a>
+{% endblock %}

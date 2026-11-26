@@ -2,16 +2,121 @@
 
 {% block title %}داشبورد — باربری هوشمند{% endblock %}
 
-{% block card %}
-<h1 class="mb-1 text-center text-2xl font-bold">داشبورد</h1>
-<p class="mb-6 text-center text-sm text-white/90">به باربری هوشمند خوش آمدید.</p>
+{% block main_class %}max-w-6xl{% endblock %}
 
-<form method="post" action="/auth/logout">
-  <button type="submit"
-          class="w-full rounded-xl border border-red-300/40 bg-red-500/20 px-4 py-3 text-base font-bold text-red-50 shadow-lg shadow-indigo-900/20 transition-all duration-200 hover:bg-red-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-purple-700 active:translate-y-0 motion-reduce:transition-none">
-    خروج
-  </button>
-</form>
+{% block card %}
+{% set role_labels = {
+  "driver": "راننده",
+  "shipper": "صاحب کالا / انبار",
+  "carrier": "شرکت حمل و نقل",
+  "admin": "مدیر سیستم"
+} %}
+{% set role_pill_classes = {
+  "driver": "border-blue-200 bg-blue-50 text-blue-700",
+  "shipper": "border-emerald-200 bg-emerald-50 text-emerald-700",
+  "carrier": "border-purple-200 bg-purple-50 text-purple-700",
+  "admin": "border-orange-200 bg-orange-50 text-orange-700"
+} %}
+{% set cta_class = "mt-auto inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-pink-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-pink-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2 focus-visible:ring-offset-white active:translate-y-0 motion-reduce:transform-none motion-reduce:transition-none" %}
+{% set card_class = "flex h-full flex-col rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-shadow duration-200 hover:shadow-md motion-reduce:transition-none" %}
+{% set icon_tile_class = "mb-3 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 text-violet-600" %}
+
+<header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+  <div class="max-w-md">
+    <p class="text-sm text-gray-500">خوش آمدید</p>
+    {% if current_user %}
+      <h1 class="mt-1 text-2xl font-bold text-gray-800">{{ current_user.name }}</h1>
+      <span data-role-badge
+            class="mt-2 inline-flex rounded-full border px-3 py-1 text-xs font-medium {{ role_pill_classes.get(current_user.role.value, 'border-gray-200 bg-gray-50 text-gray-700') }}">
+        {{ role_labels.get(current_user.role.value, current_user.role.value) }}
+      </span>
+    {% else %}
+      <h1 class="mt-1 text-2xl font-bold text-gray-800">به باربری هوشمند خوش آمدید.</h1>
+    {% endif %}
+  </div>
+
+  <form method="post" action="/auth/logout" class="w-full sm:ms-auto sm:w-auto">
+    <button type="submit"
+            class="w-full rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-base font-bold text-red-700 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-100 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 focus-visible:ring-offset-white active:translate-y-0 motion-reduce:transform-none motion-reduce:transition-none sm:w-auto">
+      خروج
+    </button>
+  </form>
+</header>
+
+<div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+  <article class="{{ card_class }}">
+    <span class="{{ icon_tile_class }}">
+      <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 8.5 12 3 3 8.5v7L12 21l9-5.5v-7Z"></path>
+        <path d="m3 8.5 9 5 9-5"></path>
+        <path d="M12 13.5V21"></path>
+      </svg>
+    </span>
+    <h2 class="text-base font-bold text-gray-800">لیست بارهای موجود</h2>
+    <p class="mt-1 mb-4 text-sm leading-6 text-gray-500">
+      بارهای ثبت‌شده برای حمل را ببینید و انتخاب کنید.
+    </p>
+    <a href="/cargos" class="{{ cta_class }}">مشاهده بارها</a>
+  </article>
+
+  <article class="{{ card_class }}">
+    <span class="{{ icon_tile_class }}">
+      <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M8 3v4"></path>
+        <path d="M16 3v4"></path>
+        <rect x="3" y="5" width="18" height="16" rx="2"></rect>
+        <path d="M3 10h18"></path>
+        <circle cx="16" cy="16" r="3"></circle>
+        <path d="M16 15v1.5l1 1"></path>
+      </svg>
+    </span>
+    <h2 class="text-base font-bold text-gray-800">نوبت‌دهی بارگیری</h2>
+    <p class="mt-1 mb-4 text-sm leading-6 text-gray-500">
+      نوبت خالی انبارها را رزرو کنید.
+    </p>
+    <a href="#" data-future-route="/time-slots" class="{{ cta_class }}">رزرو نوبت</a>
+  </article>
+
+  <article class="{{ card_class }}">
+    <span class="{{ icon_tile_class }}">
+      <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8Z"></path>
+        <path d="M14 3v5h5"></path>
+        <path d="M8 13h8"></path>
+        <path d="M8 17h5"></path>
+      </svg>
+    </span>
+    <h2 class="text-base font-bold text-gray-800">بارنامه دیجیتال</h2>
+    <p class="mt-1 mb-4 text-sm leading-6 text-gray-500">
+      بارنامه سفر را مشاهده و وضعیت آن را پیگیری کنید.
+    </p>
+    <a href="#" data-future-route="/bol" class="{{ cta_class }}">مشاهده بارنامه</a>
+  </article>
+
+  {% if current_user and current_user.role.value in ("carrier", "admin") %}
+  <article class="{{ card_class }}">
+    <span class="{{ icon_tile_class }}">
+      <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 16V6a1 1 0 0 1 1-1h9v11"></path>
+        <path d="M13 9h4l4 4v3h-8"></path>
+        <circle cx="7" cy="17" r="2"></circle>
+        <circle cx="17" cy="17" r="2"></circle>
+      </svg>
+    </span>
+    <h2 class="text-base font-bold text-gray-800">مدیریت ناوگان</h2>
+    <p class="mt-1 mb-4 text-sm leading-6 text-gray-500">
+      رانندگان و ظرفیت ناوگان را مدیریت کنید.
+    </p>
+    <a href="#" data-future-route="/fleet" class="{{ cta_class }}">مدیریت ناوگان</a>
+  </article>
+  {% endif %}
+</div>
+
+{% include "partials/quick_links.html" %}
 {% endblock %}
 
 {% block footer %}{% endblock %}

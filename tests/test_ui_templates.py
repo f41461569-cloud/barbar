@@ -19,8 +19,9 @@ import uuid
 import pytest
 from fastapi.testclient import TestClient
 
+from app.auth.security import hash_password
 from app.database import Base, SessionLocal, engine
-from app.models import User
+from app.models import User, UserRole
 
 DATABASE_URL = os.getenv("DATABASE_URL", "")
 
@@ -55,10 +56,10 @@ def _tags(html: str, name: str):
     return found
 
 
-def _client() -> TestClient:
+def _client(follow_redirects: bool = True) -> TestClient:
     from app.main import app
 
-    return TestClient(app)
+    return TestClient(app, follow_redirects=follow_redirects)
 
 
 def _new_phone() -> str:
@@ -110,12 +111,30 @@ def test_no_legacy_style_or_js_framework(path):
 
 
 @pytest.mark.parametrize("path", PAGES)
-def test_glass_card_and_gradient(path):
+def test_light_theme_shell(path):
     body = _client().get(path).text
-    for token in ("backdrop-blur-xl", "bg-white/10", "rounded-3xl", "max-w-md"):
+    for token in (
+        "bg-white",
+        "border-gray-200",
+        "rounded-2xl",
+        "shadow-",
+        "from-pink-50",
+        "via-white",
+        "to-violet-100",
+        "text-gray-800",
+    ):
         assert token in body, token
-    for token in ("from-blue-700", "via-indigo-700", "to-purple-700"):
-        assert token in body, token
+    assert 'color-scheme" content="light"' in body
+    for token in (
+        "backdrop-blur",
+        "bg-white/10",
+        "text-white/",
+        "from-blue-700",
+        "via-indigo-700",
+        "to-purple-700",
+        "#4338ca",
+    ):
+        assert token not in body, token
 
 
 @pytest.mark.parametrize("path", PAGES)
@@ -189,18 +208,30 @@ def test_primary_buttons_are_gradient():
     submit = [a for a, _ in buttons if a.get("type") == "submit"]
     assert submit
     classes = submit[0].get("class", "")
-    for token in ("from-blue-500", "to-purple-500", "hover:from-blue-400", "focus-visible:ring"):
+    for token in (
+        "from-violet-600",
+        "to-pink-600",
+        "hover:-translate-y-0.5",
+        "hover:shadow-xl",
+        "focus-visible:ring-2",
+        "focus-visible:ring-violet-600",
+    ):
         assert token in classes, token
+    for token in ("from-blue-500", "to-purple-500"):
+        assert token not in classes, token
 
 
 def test_dashboard_uses_same_shell_and_destructive_logout():
     body = _client().get("/dashboard").text
-    assert "backdrop-blur-xl" in body
+    assert "bg-white" in body
+    assert "backdrop-blur" not in body
     assert "داشبورد" in body
     assert 'action="/auth/logout"' in body
     buttons = _tags(body, "button")
     assert buttons
-    assert "bg-red-500/20" in buttons[0][0].get("class", "")
+    logout_classes = buttons[0][0].get("class", "").split()
+    for token in ("bg-red-50", "text-red-700", "border-red-200"):
+        assert token in logout_classes, token
 
 
 # --------------------------------------------------------------------------- #
@@ -224,6 +255,8 @@ def test_wrong_password_renders_styled_alert():
         assert response.status_code == 401, response.text
         assert 'role="alert"' in response.text
         assert 'aria-live="assertive"' in response.text
+        for token in ("bg-red-50", "text-red-700", "border-red-200"):
+            assert token in response.text, token
         assert LOGIN_ERROR in response.text
         assert "set-cookie" not in response.headers
     finally:
@@ -247,6 +280,8 @@ def test_duplicate_phone_renders_styled_alert():
         )
         assert second.status_code == 409, second.text
         assert 'role="alert"' in second.text
+        for token in ("bg-red-50", "text-red-700", "border-red-200"):
+            assert token in second.text, token
         assert REGISTER_ERROR in second.text
 
         db = SessionLocal()
@@ -310,5 +345,150 @@ def test_register_error_preserves_name_and_role():
         assert response.status_code == 409
         assert 'value="Second Person"' in response.text
         assert re.search(r'<option[^>]*value="shipper"[^>]*selected', response.text)
+    finally:
+        _cleanup(phone)
+
+
+# --------------------------------------------------------------------------- #
+# Dashboard redesign (docs/SPEC-dashboard.md, AC-1 … AC-6, AC-10)
+# --------------------------------------------------------------------------- #
+
+CARD_TITLES = ("لیست بارهای موجود", "نوبت‌دهی بارگیری", "بارنامه دیجیتال")
+CARD_ROUTES = ("/cargos", "/time-slots", "/bol")
+FLEET_TITLE = "مدیریت ناوگان"
+
+ROLE_LABELS = {
+    "driver": "راننده",
+    "shipper": "صاحب کالا / انبار",
+    "carrier": "شرکت حمل و نقل",
+    "admin": "مدیر سیستم",
+}
+ROLE_PILL_TOKENS = {
+    "driver": ("bg-blue-50", "text-blue-700"),
+    "shipper": ("bg-emerald-50", "text-emerald-700"),
+    "carrier": ("bg-purple-50", "text-purple-700"),
+    "admin": ("bg-orange-50", "text-orange-700"),
+}
+FLEET_ROLES = ("carrier", "admin")
+
+GENERIC_GREETING = "به باربری هوشمند خوش آمدید."
+
+
+def _articles(html: str):
+    """Every <article>…</article> block (cards are not nested)."""
+    return re.findall(r"<article\b.*?</article>", html, re.DOTALL)
+
+
+def _dashboard_card(html: str, title: str) -> str | None:
+    return next((a for a in _articles(html) if title in a), None)
+
+
+def _create_user(phone: str, name: str, role: str) -> None:
+    """Insert a user directly: the register form intentionally refuses `admin`."""
+    db = SessionLocal()
+    try:
+        db.add(
+            User(
+                phone=phone,
+                name=name,
+                password_hash=hash_password(PASSWORD),
+                role=UserRole(role),
+            )
+        )
+        db.commit()
+    finally:
+        db.close()
+
+
+def test_dashboard_shows_three_cards_anonymously():
+    body = _client().get("/dashboard").text
+    articles = _articles(body)
+    assert len(articles) == 3, articles
+
+    for title, route in zip(CARD_TITLES, CARD_ROUTES):
+        article = next((a for a in articles if title in a), None)
+        assert article is not None, title
+        assert re.search(r'<svg\b[^>]*aria-hidden="true"', article), title
+        assert re.search(rf"<h2\b[^>]*>\s*{re.escape(title)}\s*</h2>", article), title
+        assert re.search(r"<p\b[^>]*>[^<]+</p>", article), title
+        if route == "/cargos":
+            # The cargo card is now a real route (SPEC-core §8).
+            assert re.search(r'<a\b[^>]*href="/cargos"', article), title
+            assert f'data-future-route="{route}"' not in article, title
+        else:
+            assert re.search(rf'<a\b[^>]*data-future-route="{re.escape(route)}"', article), title
+        # Light theme: pure white cards, subtle border/shadow, no glassmorphism.
+        for token in ("bg-white", "rounded-2xl", "border-gray-200", "shadow-"):
+            assert token in article, (title, token)
+        assert "backdrop-blur" not in article, title
+
+    # The Fleet card is not merely hidden: it must not be in the DOM.
+    assert FLEET_TITLE not in body
+
+
+def test_dashboard_grid_and_container():
+    body = _client().get("/dashboard").text
+    for token in ("grid-cols-1", "sm:grid-cols-2", "lg:grid-cols-4"):
+        assert token in body, token
+    # D2 = A: the dashboard overrides the default shell width.
+    assert "max-w-6xl" in body
+
+    # Auth pages must keep the narrow default.
+    for path in ("/auth/login", "/auth/register"):
+        auth_body = _client().get(path).text
+        assert "max-w-md" in auth_body, path
+        assert "max-w-6xl" not in auth_body, path
+
+
+def test_dashboard_header_single_h1_generic_greeting_and_logout():
+    body = _client().get("/dashboard").text
+    assert len(re.findall(r"<h1\b", body)) == 1, "dashboard must have exactly one h1"
+    assert GENERIC_GREETING in body
+    assert 'action="/auth/logout"' in body
+
+    buttons = _tags(body, "button")
+    assert buttons, "dashboard has no button"
+    assert "bg-red-50" in buttons[0][0].get("class", "").split()
+    # Anonymous visitors get no role badge.
+    assert "data-role-badge" not in body
+
+
+def test_dashboard_ignores_invalid_cookie():
+    client = _client()
+    client.cookies.set("access_token", "not-a-jwt")
+    response = client.get("/dashboard")
+    body = response.text
+    assert response.status_code == 200, body
+    assert GENERIC_GREETING in body
+    assert "data-role-badge" not in body
+    assert FLEET_TITLE not in body
+
+
+@requires_postgres
+@pytest.mark.parametrize("role", ["driver", "shipper", "carrier", "admin"])
+def test_dashboard_role_identity(role):
+    Base.metadata.create_all(bind=engine)
+    phone = _new_phone()
+    name = f"کاربر {role}"
+    _create_user(phone, name, role)
+    try:
+        client = _client(follow_redirects=False)
+        login = client.post("/auth/login", data={"phone": phone, "password": PASSWORD})
+        assert login.status_code == 303, login.text
+
+        body = client.get("/dashboard").text
+        assert name in body, role
+        assert ROLE_LABELS[role] in body, role
+
+        badge = re.search(r"<span\b[^>]*data-role-badge[^>]*>", body)
+        assert badge is not None, role
+        badge_classes = _attrs(badge.group(0)).get("class", "")
+        for token in ROLE_PILL_TOKENS[role]:
+            assert token in badge_classes, (role, token)
+
+        # Identity is rendered, but the phone number must never reach the page.
+        assert phone not in body, role
+        # Fleet: carrier and admin see it; driver and shipper never do.
+        assert (FLEET_TITLE in body) is (role in FLEET_ROLES), role
     finally:
         _cleanup(phone)

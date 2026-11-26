@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}بارهای من — باربری هوشمند{% endblock %}
+
+{% block main_class %}max-w-6xl{% endblock %}
+
+{% block card %}
+{% set status_badge = {
+  "available": "border-emerald-200 bg-emerald-50 text-emerald-700",
+  "booked": "border-orange-200 bg-orange-50 text-orange-700"
+} %}
+
+<header class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+  <div>
+    <h1 class="text-2xl font-bold text-gray-800">بارهای من</h1>
+    <p class="mt-1 text-sm leading-6 text-gray-500">
+      بارهای ثبت‌شده خود و وضعیت رزرو آن‌ها را ببینید.
+    </p>
+  </div>
+  <a href="/shipper/cargos/new" data-quick-link="shipper-cargo-new"
+     class="inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-violet-600 to-pink-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-pink-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2 focus-visible:ring-offset-white active:translate-y-0 motion-reduce:transform-none motion-reduce:transition-none sm:w-auto">
+    ثبت بار جدید
+  </a>
+</header>
+
+{% if flash %}
+<div role="status" aria-live="polite"
+     class="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+  {{ flash }}
+</div>
+{% endif %}
+
+{% if cargos %}
+<div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+  {% for cargo in cargos %}
+  <article data-cargo-id="{{ cargo.id }}"
+           class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+    <div class="flex items-start justify-between gap-3">
+      <h2 class="text-base font-bold text-gray-800">{{ cargo.title }}</h2>
+      <span class="inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium {{ status_badge.get(cargo.status, status_badge['available']) }}">
+        {{ status_labels.get(cargo.status, cargo.status) }}
+      </span>
+    </div>
+    <dl class="mt-3 space-y-1 text-sm text-gray-600">
+      <div class="flex justify-between gap-3">
+        <dt class="text-gray-500">مسیر</dt>
+        <dd class="font-medium text-gray-800">{{ cargo.origin }} ← {{ cargo.destination }}</dd>
+      </div>
+      <div class="flex justify-between gap-3">
+        <dt class="text-gray-500">وزن</dt>
+        <dd>{{ "{:,.0f}".format(cargo.weight_kg) }} کیلوگرم</dd>
+      </div>
+      <div class="flex justify-between gap-3">
+        <dt class="text-gray-500">قیمت</dt>
+        <dd>{{ "{:,.0f}".format(cargo.price) }} تومان</dd>
+      </div>
+    </dl>
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<p class="mt-6 rounded-2xl border border-gray-200 bg-gray-50 p-6 text-center text-sm text-gray-500">
+  هنوز باری ثبت نکرده‌اید.
+</p>
+{% endif %}
+
+<a href="/dashboard"
+   class="mt-6 inline-flex text-sm font-medium text-violet-700 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2">
+  بازگشت به داشبورد
+</a>
+{% endblock %}

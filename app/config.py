@@ -7,5 +7,6 @@ class Settings(BaseSettings):
     )
     SECRET_KEY: str = os.getenv("SECRET_KEY", "dev-secret-key-change-me")
     ALGORITHM: str = "HS256"
+    UPLOAD_DIR: str = os.getenv("UPLOAD_DIR", "./uploads")
 
 settings = Settings()

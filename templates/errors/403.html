@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}دسترسی غیرمجاز — باربری هوشمند{% endblock %}
+
+{% block card %}
+<div role="alert" aria-live="assertive"
+     class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+  <p class="font-bold">دسترسی غیرمجاز</p>
+  <p class="mt-1">{{ message or "شما به این بخش دسترسی ندارید." }}</p>
+</div>
+
+<a href="/dashboard"
+   class="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-violet-600 to-pink-600 px-4 py-3 text-base font-bold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-pink-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2 focus-visible:ring-offset-white active:translate-y-0 motion-reduce:transform-none motion-reduce:transition-none">
+  بازگشت به داشبورد
+</a>
+{% endblock %}

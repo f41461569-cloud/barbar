@@ -1,0 +1,14 @@
+{% if current_user and current_user.role.value in ("driver", "shipper", "admin") %}
+{% set quick_link_class = "inline-flex items-center rounded-xl border border-violet-200 bg-violet-50 px-4 py-2 text-sm font-medium text-violet-700 transition-colors hover:bg-violet-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2 focus-visible:ring-offset-white" %}
+<div data-quick-links class="mt-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+  <span class="self-center text-xs font-medium text-gray-500">دسترسی سریع:</span>
+  {% if current_user.role.value == "driver" %}
+  <a data-quick-link="driver-documents" href="/driver/documents" class="{{ quick_link_class }}">مدارک من</a>
+  {% elif current_user.role.value == "shipper" %}
+  <a data-quick-link="shipper-cargos" href="/shipper/cargos" class="{{ quick_link_class }}">بارهای من</a>
+  <a data-quick-link="shipper-cargo-new" href="/shipper/cargos/new" class="{{ quick_link_class }}">ثبت بار جدید</a>
+  {% elif current_user.role.value == "admin" %}
+  <a data-quick-link="admin-documents" href="/admin/documents" class="{{ quick_link_class }}">بررسی مدارک</a>
+  {% endif %}
+</div>
+{% endif %}

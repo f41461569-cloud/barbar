@@ -1,8 +1,9 @@
 # PLAN: Phase 1 — Core Flow
 
 ## Status
-Approved — 2026-11-26 (SPEC-core approved; ADR 005 and ADR 006 accepted; defaults D1–D8 confirmed).
-Implementation in progress under AGENTS.md.
+Implemented — 2026-11-27 (SPEC-core approved; ADR 005 and ADR 006 accepted; defaults D1–D8
+confirmed). Code, tests, and migration are complete and green on PostgreSQL; Phase 6 manual
+Chrome QA is the only remaining item.
 
 ## Dependencies
 
@@ -100,7 +101,7 @@ in that area.
 3. [x] Record the approvals at the top of this plan.
 
 ### Phase 1 — Documents (RED → GREEN)
-4. [ ] Write `tests/conftest.py` and `tests/test_documents.py`:
+4. [x] Write `tests/conftest.py` and `tests/test_documents.py`:
    - upload new PDF → 201, `pending`, UUID path, original filename preserved;
    - replace → 200, `version+1`, `pending`, old file deleted;
    - 413 oversized, 415 wrong type/magic mismatch, 422 empty, 403 non-driver, 401 anonymous;
@@ -110,72 +111,91 @@ in that area.
    - download owner/admin 200, other driver 403, missing file 404, `nosniff` header;
    - page cases in `tests/test_core_ui.py`: `/driver/documents` and `/admin/documents` render,
      field names, role gates, status badges, accessible alerts.
-5. [ ] Run `pytest tests/test_documents.py -v` → RED (import/route failures). Record the output.
-6. [ ] Add `DriverDocument` to `app/models.py` (the single migration is generated in Phase 5, after
+5. [x] Run `pytest tests/test_documents.py -v` → RED (import/route failures). Record the output.
+6. [x] Add `DriverDocument` to `app/models.py` (the single migration is generated in Phase 5, after
    all model changes; tests use `create_all`).
-7. [ ] Implement `app/services/document_storage.py` + `document_service.py` + `errors.py`.
-8. [ ] Implement `app/auth/guards.py` and the `/api/drivers`, `/api/admin/documents`,
+7. [x] Implement `app/services/document_storage.py` + `document_service.py` + `errors.py`.
+8. [x] Implement `app/auth/guards.py` and the `/api/drivers`, `/api/admin/documents`,
    `/api/documents/{id}/file` routes.
-9. [ ] Implement `/driver/documents` and `/admin/documents` pages + templates.
-10. [ ] `pytest tests/test_documents.py -v` → GREEN.
+9. [x] Implement `/driver/documents` and `/admin/documents` pages + templates.
+10. [x] `pytest tests/test_documents.py -v` → GREEN.
 
 ### Phase 2 — Cargo create/list (RED → GREEN)
-11. [ ] Write `tests/test_cargos.py`: create 201, session-derived `shipper_id`, `status=available`,
+11. [x] Write `tests/test_cargos.py`: create 201, session-derived `shipper_id`, `status=available`,
     validation 422 (title/origin/destination/weight/price), role 403, anonymous 401;
     list defaults to `available`, filters (origin/destination/min-max weight/price), pagination,
     invalid limits, `booked`/`all` admin-only, detail 404, booked cargo hidden.
-12. [ ] Run `pytest tests/test_cargos.py -v` → RED. Record.
-13. [ ] Add `app/schemas.py` DTOs + `cargo_service.py` + `app/api/cargos.py`.
-14. [ ] `pytest tests/test_cargos.py -v` → GREEN.
+12. [x] Run `pytest tests/test_cargos.py -v` → RED. Record.
+13. [x] Add `app/schemas.py` DTOs + `cargo_service.py` + `app/api/cargos.py`.
+14. [x] `pytest tests/test_cargos.py -v` → GREEN.
 
 ### Phase 3 — Cargo UI (shipper + driver list)
-15. [ ] Write the cargo-page cases in `tests/test_core_ui.py` (rendering, field names, filters,
+15. [x] Write the cargo-page cases in `tests/test_core_ui.py` (rendering, field names, filters,
     role gates, dashboard quick links, 403 page, 320-px markup contract).
-16. [ ] Implement `/shipper/cargos`, `/shipper/cargos/new`, `/cargos` routes/templates and the
+16. [x] Implement `/shipper/cargos`, `/shipper/cargos/new`, `/cargos` routes/templates and the
     dashboard quick links; update `tests/test_ui_templates.py` for the now-live `/cargos` link.
-17. [ ] `pytest tests/test_core_ui.py tests/test_ui_templates.py -v` → GREEN.
+17. [x] `pytest tests/test_core_ui.py tests/test_ui_templates.py -v` → GREEN.
 
 ### Phase 4 — Booking (RED → GREEN, including concurrency)
-18. [ ] Write `tests/test_cargo_booking.py`:
+18. [x] Write `tests/test_cargo_booking.py`:
     - verified driver books available cargo → 201, `confirmed`, cargo `booked`, `time_slot_id` null;
     - missing cargo 404; already booked 409; unverified 403 (cargo stays available); shipper 403;
     - body `driver_id` ignored; duplicate request 409;
     - page cases in `tests/test_core_ui.py`: success flash, conflict alert, unverified notice.
-19. [ ] Write `tests/test_cargo_concurrency.py` (PostgreSQL-gated):
+19. [x] Write `tests/test_cargo_concurrency.py` (PostgreSQL-gated):
     - two barrier-released threads with separate `TestClient`s and driver cookies → `[201, 409]`;
     - exactly one confirmed booking row; cargo `booked`;
     - direct second confirmed insert → `IntegrityError` (partial index proof);
     - two unverified drivers race → both 403 and the cargo stays `available`.
-20. [ ] Run both files → RED. Record.
-21. [ ] Make `Booking.time_slot_id` nullable and add `uq_bookings_cargo_confirmed` to the model
+20. [x] Run both files → RED. Record.
+21. [x] Make `Booking.time_slot_id` nullable and add `uq_bookings_cargo_confirmed` to the model
     (migration is generated once in Phase 5; hand-check the partial index because autogenerate may
     omit the `WHERE` clause).
-22. [ ] Implement `app/services/cargo_booking_service.py` (lock → verify → guarded update →
+22. [x] Implement `app/services/cargo_booking_service.py` (lock → verify → guarded update →
     insert → commit; rollback on domain errors; `IntegrityError` → 409) and
     `POST /api/cargos/{id}/book`.
-23. [ ] Implement the booking action on `/cargos` + flash/alert rendering.
-24. [ ] `pytest tests/test_cargo_booking.py tests/test_cargo_concurrency.py -v` with PostgreSQL →
+23. [x] Implement the booking action on `/cargos` + flash/alert rendering.
+24. [x] `pytest tests/test_cargo_booking.py tests/test_cargo_concurrency.py -v` with PostgreSQL →
     GREEN.
 
 ### Phase 5 — Polish and regression
-25. [ ] Coverage check: every Phase 1 page/action has a test written **before** its template/route
+25. [x] Coverage check: every Phase 1 page/action has a test written **before** its template/route
     (documents in Phase 1, cargo pages in Phase 3, booking/flash/403/quick links in Phase 4).
     No new behavior without a test.
-26. [ ] Run `pytest tests/ -v` with PostgreSQL → **all collected tests pass**, including the
+26. [x] Run `pytest tests/ -v` with PostgreSQL → **all collected tests pass**, including the
     original 45. Record the new count.
-27. [ ] Run `pytest tests/ -q` without PostgreSQL → PostgreSQL-only modules skip, no failures.
-28. [ ] `alembic upgrade head` on a scratch PostgreSQL DB; run `alembic check` (no pending
+27. [x] Run `pytest tests/ -q` without PostgreSQL → PostgreSQL-only modules skip, no failures.
+28. [x] `alembic upgrade head` on a scratch PostgreSQL DB; run `alembic check` (no pending
     changes); `alembic downgrade -1`; re-upgrade.
-29. [ ] Pre-migration data check **on the target DB**:
+29. [x] Pre-migration data check **on the target DB**:
     `SELECT cargo_id, count(*) FROM bookings WHERE status='confirmed' AND cargo_id IS NOT NULL GROUP BY cargo_id HAVING count(*) > 1;`
     must return zero rows before the unique index is created.
-30. [ ] Grep for forbidden leaks: `stored_path` in templates/JSON, phone numbers in admin list,
+30. [x] Grep for forbidden leaks: `stored_path` in templates/JSON, phone numbers in admin list,
     raw query echoing, `|safe` on user input.
 
 ### Phase 6 — Manual QA (Chrome)
 31. [ ] Run the dev server against the migrated SQLite DB.
 32. [ ] Execute the matrix below; record date/browser/results here.
 33. [ ] Clean up QA users, cargo, bookings, documents, uploaded files, screenshots; close tabs.
+
+## Implementation record (2026-11-27)
+
+- **Phase 1 RED:** `tests/test_documents.py` failed collection with
+  `ImportError: cannot import name 'DriverDocument'`. **GREEN:** 17 passed.
+- **Phase 2 RED:** `tests/test_cargos.py` — 32 failed (routes absent). **GREEN:** 32 passed.
+- **Phase 3 RED:** cargo page cases — 16 failed. **GREEN:** `test_core_ui.py` 33 and
+  `test_ui_templates.py` 38 passed (67 combined).
+- **Phase 4 RED:** `test_cargo_booking.py` + `test_cargo_concurrency.py` — 12 failed.
+  **GREEN:** 9 + 3 passed, including the PostgreSQL two-driver race (`201` + `409`, one row).
+- **Full suite on PostgreSQL:** **139 passed** (previous 45 preserved).
+- **Full suite on SQLite:** **29 passed, 110 skipped** (PostgreSQL-only modules gated).
+- **Migration `cc9ac3ac14f8`:** `upgrade head` → `alembic check` (no diff) → `downgrade -1` →
+  `upgrade head` all succeeded on `smart_freight_migration_test`; pre-migration duplicate check
+  returned zero rows. The dev SQLite file had an empty `alembic_version`, so it was stamped at
+  `4141487d1136` and upgraded; `alembic check` is clean.
+- **Leak scan:** no `stored_path` in routes/templates, no phone on the admin queue, no `|safe`,
+  no raw query echo.
+- **Remaining:** Phase 6 manual Chrome QA only.
 
 ## Migration notes
 

@@ -1,7 +1,9 @@
-"""Shared helpers for the Phase 1 test suite."""
+"""Shared helpers for the Phase 1 and registration-v2 test suites."""
 
 from __future__ import annotations
 
+import random
+import string
 import uuid
 from datetime import datetime
 
@@ -14,17 +16,141 @@ from app.models import Cargo, User, UserRole
 PASSWORD = "secret123"
 
 
-def make_user(role: str = "driver", *, name: str | None = None) -> User:
-    """Insert a user directly (admin cannot self-register) and return it detached."""
+def new_phone() -> str:
+    """Return a canonical Iranian mobile number that passes form validation."""
+    suffix = "".join(random.choice(string.digits) for _ in range(9))
+    return f"+989{suffix}"
+
+
+def new_national_id() -> str:
+    """Return a 10-digit national ID with a valid Iranian checksum."""
+    digits = [random.randint(0, 9) for _ in range(9)]
+    if len(set(digits)) == 1:
+        digits[0] = (digits[0] + 1) % 10
+    total = sum(digits[i] * (10 - i) for i in range(9)) % 11
+    check = total if total < 2 else 11 - total
+    return "".join(str(d) for d in digits) + str(check)
+
+
+def new_license_number() -> str:
+    return "L" + uuid.uuid4().hex[:10].upper()
+
+
+def new_username() -> str:
+    return "admin" + uuid.uuid4().hex[:8]
+
+
+def new_plate_number() -> str:
+    return f"{random.randint(10, 99)} ب {random.randint(100, 999)} ایران {random.randint(10, 99)}"
+
+
+def driver_payload(**overrides) -> dict[str, str]:
+    data = {
+        "full_name": "Test Driver",
+        "phone": new_phone(),
+        "national_id": new_national_id(),
+        "license_number": new_license_number(),
+        "truck_type": "truck",
+        "plate_number": new_plate_number(),
+        "password": PASSWORD,
+    }
+    data.update(overrides)
+    return data
+
+
+def shipper_payload(**overrides) -> dict[str, str]:
+    data = {
+        "full_name": "Test Shipper",
+        "phone": new_phone(),
+        "cargo_type_preference": "general",
+        "national_id": new_national_id(),
+        "password": PASSWORD,
+    }
+    data.update(overrides)
+    return data
+
+
+def admin_payload(admin_code: str, **overrides) -> dict[str, str]:
+    data = {
+        "username": new_username(),
+        "password": PASSWORD,
+        "admin_code": admin_code,
+    }
+    data.update(overrides)
+    return data
+
+
+def register_driver(client: TestClient, **overrides):
+    return client.post(
+        "/auth/register/driver",
+        data=driver_payload(**overrides),
+        follow_redirects=False,
+    )
+
+
+def register_shipper(client: TestClient, **overrides):
+    return client.post(
+        "/auth/register/shipper",
+        data=shipper_payload(**overrides),
+        follow_redirects=False,
+    )
+
+
+def register_admin(client: TestClient, code: str, **overrides):
+    return client.post(
+        "/auth/register/admin",
+        data=admin_payload(code, **overrides),
+        follow_redirects=False,
+    )
+
+
+def login_user(client: TestClient, phone: str, password: str = PASSWORD):
+    return client.post(
+        "/auth/login",
+        data={"phone": phone, "password": password},
+        follow_redirects=False,
+    )
+
+
+def login_admin(
+    client: TestClient,
+    username: str,
+    password: str = PASSWORD,
+    admin_code: str = "",
+):
+    return client.post(
+        "/auth/admin/login",
+        data={
+            "username": username,
+            "password": password,
+            "admin_code": admin_code,
+        },
+        follow_redirects=False,
+    )
+
+
+def make_user(
+    role: str = "driver", *, name: str | None = None, **profile
+) -> User:
+    """Insert a user directly and return it detached.
+
+    New profile columns are nullable, so most tests can ignore them. Admins get
+    a username so the separate admin login can authenticate them.
+    """
     suffix = uuid.uuid4().hex[:10]
+    values = {
+        "phone": profile.pop("phone", new_phone()),
+        "name": name or f"{role}-{suffix}",
+        "password_hash": hash_password(profile.pop("password", PASSWORD)),
+        "role": UserRole(role),
+    }
+    if role == "admin":
+        values["username"] = profile.pop("username", new_username())
+    values.update(profile)
+
     db = SessionLocal()
     try:
-        user = User(
-            phone=f"+9891{suffix}",
-            name=name or f"{role}-{suffix}",
-            password_hash=hash_password(PASSWORD),
-            role=UserRole(role),
-        )
+        user = User(**values)
         db.add(user)
         db.commit()
         db.refresh(user)
@@ -35,9 +161,12 @@ def make_user(role: str = "driver", *, name: str | None = None) -> User:
 
 
 def auth_headers(user: User) -> dict[str, str]:
-    token = create_access_token(
-        {"sub": str(user.id), "phone": user.phone, "role": user.role.value}
-    )
+    payload = {"sub": str(user.id), "role": user.role.value}
+    if user.phone:
+        payload["phone"] = user.phone
+    if getattr(user, "username", None):
+        payload["username"] = user.username
+    token = create_access_token(payload)
     return {"Authorization": f"Bearer {token}"}
 
 

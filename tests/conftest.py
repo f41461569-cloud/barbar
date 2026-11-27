@@ -13,6 +13,19 @@ import app.models  # noqa: F401  -- register every table on Base.metadata
 from app.config import settings
 from app.database import Base, engine
 
+TEST_ADMIN_CODE = "test-admin-code-0123456789"
+
+
+@pytest.fixture(autouse=True)
+def _default_admin_code(monkeypatch):
+    """Every test gets a known admin code unless it overrides it."""
+    monkeypatch.setattr(settings, "ADMIN_CODE", TEST_ADMIN_CODE)
+
+
+@pytest.fixture
+def admin_code():
+    return TEST_ADMIN_CODE
+
 
 def _is_postgres() -> bool:
     return engine.dialect.name == "postgresql"

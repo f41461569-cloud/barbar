@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% from "macros/forms.html" import link_on_navy %}
+
+{% block title %}ثبت‌نام موفق — باربر هوشمند{% endblock %}
+
+{% block card %}
+<div class="text-center">
+  <span class="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+    <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"></path></svg>
+  </span>
+  <h1 class="mt-4 text-2xl font-bold text-[#0a192f]">ثبت‌نام با موفقیت انجام شد.</h1>
+  <p class="mt-2 text-sm leading-6 text-slate-500">{{ message }}</p>
+
+  <a href="{{ action_href }}"
+     class="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-[#fbbf24] px-4 py-3 text-base font-bold text-gray-900 shadow-lg shadow-amber-500/20 transition-all duration-200 hover:bg-[#fcd34d] hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fbbf24] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a192f] active:translate-y-0 motion-reduce:transform-none motion-reduce:transition-none">{{ action_label }}</a>
+</div>
+{% endblock %}
+
+{% block footer %}
+<p class="mt-6 text-center text-sm text-slate-300">
+  {{ link_on_navy("/auth/register", "بازگشت به انتخاب نقش") }}
+</p>
+{% endblock %}

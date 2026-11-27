@@ -1,15 +1,10 @@
-"""TDD tests for the login / registration UI redesign (docs/SPEC-ui.md).
+"""Tests for the shared navy/yellow shell, dashboard, and login error states.
 
-Two groups:
+Markup tests need no database; the failure paths register/login real users and
+are therefore PostgreSQL-gated, matching ``tests/test_auth.py``.
 
-* Markup/contract tests (AC-1 … AC-4, AC-7 … AC-11, AC-13) — no database needed; they only GET pages.
-* Failure-path tests (AC-5, AC-6, AC-13) — need PostgreSQL because they register/login a real user.
-  They are skipped unless DATABASE_URL is a PostgreSQL URL, matching tests/test_auth.py.
-
-Run against PostgreSQL:
-
-    $env:DATABASE_URL = "postgresql+psycopg2://user:pass@localhost:5432/smart_freight_test"
-    pytest tests/test_ui_templates.py -v
+Role-form contracts and registration error paths live in
+``tests/test_registration_ui.py``.
 """
 
 import os
@@ -22,6 +17,7 @@ from fastapi.testclient import TestClient
 from app.auth.security import hash_password
 from app.database import Base, SessionLocal, engine
 from app.models import User, UserRole
+from tests.support import PASSWORD, driver_payload, new_phone, new_username
 
 DATABASE_URL = os.getenv("DATABASE_URL", "")
 
@@ -30,8 +26,15 @@ requires_postgres = pytest.mark.skipif(
     reason="Auth failure tests require PostgreSQL (set DATABASE_URL to a postgres URL).",
 )
 
-PAGES = ("/auth/login", "/auth/register", "/dashboard")
-PASSWORD = "secret123"
+PAGES = (
+    "/auth/login",
+    "/auth/register",
+    "/auth/register/driver",
+    "/auth/register/shipper",
+    "/auth/register/admin",
+    "/auth/admin/login",
+    "/dashboard",
+)
 
 LOGIN_ERROR = "شماره تلفن یا رمز عبور نادرست است."
 REGISTER_ERROR = "این شماره تلفن قبلاً ثبت شده است."
@@ -62,21 +65,30 @@ def _client(follow_redirects: bool = True) -> TestClient:
     return TestClient(app, follow_redirects=follow_redirects)
 
 
-def _new_phone() -> str:
-    return "+9891" + uuid.uuid4().hex[:9]
+def _main_class(body: str) -> str:
+    match = re.search(r"<main[^>]*class=\"([^\"]*)\"", body)
+    assert match is not None, "no <main> element"
+    return match.group(1)
 
 
-def _cleanup(*phones):
+def _cleanup(*phones, usernames=()):
     db = SessionLocal()
     try:
-        db.query(User).filter(User.phone.in_(phones)).delete(synchronize_session=False)
+        if phones:
+            db.query(User).filter(User.phone.in_(phones)).delete(
+                synchronize_session=False
+            )
+        if usernames:
+            db.query(User).filter(User.username.in_(usernames)).delete(
+                synchronize_session=False
+            )
         db.commit()
     finally:
         db.close()
 
 
 # --------------------------------------------------------------------------- #
-# Markup / contract (AC-1, AC-2, AC-3, AC-4, AC-7, AC-8, AC-9, AC-10, AC-11)
+# Markup / contract
 # --------------------------------------------------------------------------- #
 
 
@@ -111,89 +123,33 @@ def test_no_legacy_style_or_js_framework(path):
 
 
 @pytest.mark.parametrize("path", PAGES)
-def test_light_theme_shell(path):
+def test_navy_yellow_white_shell(path):
     body = _client().get(path).text
     for token in (
+        "bg-[#0a192f]",
+        "bg-[#fbbf24]",
         "bg-white",
-        "border-gray-200",
-        "rounded-2xl",
-        "shadow-",
-        "from-pink-50",
-        "via-white",
-        "to-violet-100",
-        "text-gray-800",
+        "text-white",
+        'color-scheme" content="light"',
     ):
-        assert token in body, token
-    assert 'color-scheme" content="light"' in body
+        assert token in body, (path, token)
     for token in (
+        "from-violet-600",
+        "to-pink-600",
+        "from-pink-50",
+        "to-violet-100",
         "backdrop-blur",
-        "bg-white/10",
-        "text-white/",
-        "from-blue-700",
-        "via-indigo-700",
-        "to-purple-700",
-        "#4338ca",
     ):
-        assert token not in body, token
+        assert token not in body, (path, token)
 
 
 @pytest.mark.parametrize("path", PAGES)
 def test_brand_row_with_truck_icon(path):
     body = _client().get(path).text
     assert 'data-brand="smart-freight"' in body
-    assert "باربری هوشمند" in body
-    assert "truck" in body.lower() or "<svg" in body.lower()
-
-
-def test_login_field_contract():
-    body = _client().get("/auth/login").text
-    inputs = _tags(body, "input")
-    names = [attrs["name"] for attrs, _ in inputs if "name" in attrs]
-    assert names == ["phone", "password"], names
-
-    for attrs, raw in inputs:
-        assert "required" in raw, raw
-        assert "focus:ring-2" in attrs.get("class", ""), raw
-
-    assert _tags(body, "select") == []
-
-
-def test_register_field_contract():
-    body = _client().get("/auth/register").text
-    inputs = _tags(body, "input")
-    names = [attrs["name"] for attrs, _ in inputs if "name" in attrs]
-    assert names == ["phone", "name", "password"], names
-
-    selects = _tags(body, "select")
-    assert len(selects) == 1
-    assert selects[0][0].get("name") == "role"
-    assert "focus:ring-2" in selects[0][0].get("class", "")
-
-    option_values = [a.get("value") for a, _ in _tags(body, "option")]
-    assert option_values == ["driver", "shipper", "carrier"], option_values
-    assert "admin" not in [v.lower() for v in option_values if v]
-
-
-@pytest.mark.parametrize(
-    "path,ids",
-    [
-        ("/auth/login", ("phone", "password")),
-        ("/auth/register", ("phone", "name", "password", "role")),
-    ],
-)
-def test_labels_are_linked(path, ids):
-    body = _client().get(path).text
-    for field_id in ids:
-        assert re.search(rf'<label[^>]+for="{field_id}"', body), field_id
-        assert re.search(rf'<[a-z]+[^>]+id="{field_id}"', body, re.IGNORECASE), field_id
-
-
-def test_password_is_never_prefilled():
-    for path in ("/auth/login", "/auth/register"):
-        body = _client().get(path).text
-        for attrs, _ in _tags(body, "input"):
-            if attrs.get("name") == "password":
-                assert "value" not in attrs, attrs
+    assert "باربر هوشمند" in body
+    assert "truck" not in body.lower() or "<svg" in body.lower()
+    assert "<svg" in body.lower()
 
 
 @pytest.mark.parametrize("path", PAGES)
@@ -201,24 +157,28 @@ def test_no_alert_on_clean_get(path):
     assert 'role="alert"' not in _client().get(path).text
 
 
-def test_primary_buttons_are_gradient():
-    body = _client().get("/auth/register").text
-    buttons = _tags(body, "button")
-    assert buttons, "register page has no button"
-    submit = [a for a, _ in buttons if a.get("type") == "submit"]
-    assert submit
-    classes = submit[0].get("class", "")
-    for token in (
-        "from-violet-600",
-        "to-pink-600",
-        "hover:-translate-y-0.5",
-        "hover:shadow-xl",
-        "focus-visible:ring-2",
-        "focus-visible:ring-violet-600",
+# --------------------------------------------------------------------------- #
+# Layout
+# --------------------------------------------------------------------------- #
+
+
+def test_dashboard_grid_and_container():
+    body = _client().get("/dashboard").text
+    for token in ("grid-cols-1", "sm:grid-cols-2", "lg:grid-cols-4"):
+        assert token in body, token
+    # D2 = A: the dashboard overrides the default shell width.
+    assert "max-w-6xl" in _main_class(body)
+
+    # Auth forms keep the narrow default; the landing page is wider.
+    for path in (
+        "/auth/login",
+        "/auth/register/driver",
+        "/auth/register/shipper",
+        "/auth/register/admin",
+        "/auth/admin/login",
     ):
-        assert token in classes, token
-    for token in ("from-blue-500", "to-purple-500"):
-        assert token not in classes, token
+        assert "max-w-md" in _main_class(_client().get(path).text), path
+    assert "max-w-5xl" in _main_class(_client().get("/auth/register").text)
 
 
 def test_dashboard_uses_same_shell_and_destructive_logout():
@@ -235,22 +195,25 @@ def test_dashboard_uses_same_shell_and_destructive_logout():
 
 
 # --------------------------------------------------------------------------- #
-# Failure paths — D1 Option A (AC-5, AC-6, AC-13)
+# Failure paths
 # --------------------------------------------------------------------------- #
 
 
 @requires_postgres
 def test_wrong_password_renders_styled_alert():
     Base.metadata.create_all(bind=engine)
-    phone = _new_phone()
+    payload = driver_payload()
     try:
-        assert _client().post(
-            "/auth/register",
-            data={"phone": phone, "name": "UI Test", "password": PASSWORD, "role": "driver"},
-        ).status_code in (200, 302)
+        assert (
+            _client()
+            .post("/auth/register/driver", data=payload, follow_redirects=False)
+            .status_code
+            == 303
+        )
 
         response = _client().post(
-            "/auth/login", data={"phone": phone, "password": "definitely-wrong"}
+            "/auth/login",
+            data={"phone": payload["phone"], "password": "definitely-wrong"},
         )
         assert response.status_code == 401, response.text
         assert 'role="alert"' in response.text
@@ -260,23 +223,21 @@ def test_wrong_password_renders_styled_alert():
         assert LOGIN_ERROR in response.text
         assert "set-cookie" not in response.headers
     finally:
-        _cleanup(phone)
+        _cleanup(payload["phone"])
 
 
 @requires_postgres
 def test_duplicate_phone_renders_styled_alert():
     Base.metadata.create_all(bind=engine)
-    phone = _new_phone()
+    payload = driver_payload()
     try:
-        first = _client().post(
-            "/auth/register",
-            data={"phone": phone, "name": "UI Test", "password": PASSWORD, "role": "driver"},
+        first = _client(follow_redirects=False).post(
+            "/auth/register/driver", data=payload
         )
-        assert first.status_code in (200, 302), first.text
+        assert first.status_code == 303, first.text
 
         second = _client().post(
-            "/auth/register",
-            data={"phone": phone, "name": "UI Test", "password": PASSWORD, "role": "driver"},
+            "/auth/register/driver", data=driver_payload(phone=payload["phone"])
         )
         assert second.status_code == 409, second.text
         assert 'role="alert"' in second.text
@@ -286,71 +247,70 @@ def test_duplicate_phone_renders_styled_alert():
 
         db = SessionLocal()
         try:
-            assert db.query(User).filter(User.phone == phone).count() == 1
+            assert db.query(User).filter(User.phone == payload["phone"]).count() == 1
         finally:
             db.close()
     finally:
-        _cleanup(phone)
+        _cleanup(payload["phone"])
 
 
 @requires_postgres
 def test_error_preserves_phone_and_never_echoes_password():
     Base.metadata.create_all(bind=engine)
-    phone = _new_phone()
+    payload = driver_payload()
     submitted_password = "never-echo-this-password"
     try:
-        assert _client().post(
-            "/auth/register",
-            data={"phone": phone, "name": "UI Test", "password": PASSWORD, "role": "driver"},
-        ).status_code in (200, 302)
+        assert (
+            _client(follow_redirects=False)
+            .post("/auth/register/driver", data=payload)
+            .status_code
+            == 303
+        )
 
         response = _client().post(
-            "/auth/login", data={"phone": phone, "password": submitted_password}
+            "/auth/login",
+            data={"phone": payload["phone"], "password": submitted_password},
         )
         assert response.status_code == 401
-        assert phone in response.text
+        assert payload["phone"] in response.text
         assert submitted_password not in response.text
     finally:
-        _cleanup(phone)
+        _cleanup(payload["phone"])
 
 
 @requires_postgres
 def test_unknown_phone_uses_same_login_error():
-    Base.metadata.create_all(bind=engine)
-    phone = _new_phone()
-    try:
-        response = _client().post(
-            "/auth/login", data={"phone": phone, "password": PASSWORD}
-        )
-        assert response.status_code == 401
-        assert LOGIN_ERROR in response.text
-    finally:
-        _cleanup(phone)
+    response = _client().post(
+        "/auth/login", data={"phone": new_phone(), "password": PASSWORD}
+    )
+    assert response.status_code == 401
+    assert LOGIN_ERROR in response.text
 
 
 @requires_postgres
-def test_register_error_preserves_name_and_role():
+def test_register_error_preserves_full_name():
     Base.metadata.create_all(bind=engine)
-    phone = _new_phone()
+    first = driver_payload()
     try:
-        assert _client().post(
-            "/auth/register",
-            data={"phone": phone, "name": "UI Test", "password": PASSWORD, "role": "driver"},
-        ).status_code in (200, 302)
+        assert (
+            _client(follow_redirects=False)
+            .post("/auth/register/driver", data=first)
+            .status_code
+            == 303
+        )
 
         response = _client().post(
-            "/auth/register",
-            data={"phone": phone, "name": "Second Person", "password": PASSWORD, "role": "shipper"},
+            "/auth/register/driver",
+            data=driver_payload(phone=first["phone"], full_name="Second Person"),
         )
         assert response.status_code == 409
         assert 'value="Second Person"' in response.text
-        assert re.search(r'<option[^>]*value="shipper"[^>]*selected', response.text)
     finally:
-        _cleanup(phone)
+        _cleanup(first["phone"])
 
 
 # --------------------------------------------------------------------------- #
-# Dashboard redesign (docs/SPEC-dashboard.md, AC-1 … AC-6, AC-10)
+# Dashboard redesign
 # --------------------------------------------------------------------------- #
 
 CARD_TITLES = ("لیست بارهای موجود", "نوبت‌دهی بارگیری", "بارنامه دیجیتال")
@@ -371,7 +331,7 @@ ROLE_PILL_TOKENS = {
 }
 FLEET_ROLES = ("carrier", "admin")
 
-GENERIC_GREETING = "به باربری هوشمند خوش آمدید."
+GENERIC_GREETING = "به باربر هوشمند خوش آمدید."
 
 
 def _articles(html: str):
@@ -379,12 +339,9 @@ def _articles(html: str):
     return re.findall(r"<article\b.*?</article>", html, re.DOTALL)
 
 
-def _dashboard_card(html: str, title: str) -> str | None:
-    return next((a for a in _articles(html) if title in a), None)
-
-
-def _create_user(phone: str, name: str, role: str) -> None:
-    """Insert a user directly: the register form intentionally refuses `admin`."""
+def _create_user(phone: str, name: str, role: str) -> str | None:
+    """Insert a user directly: admins need a username for the admin login."""
+    username = new_username() if role == "admin" else None
     db = SessionLocal()
     try:
         db.add(
@@ -393,11 +350,13 @@ def _create_user(phone: str, name: str, role: str) -> None:
                 name=name,
                 password_hash=hash_password(PASSWORD),
                 role=UserRole(role),
+                username=username,
             )
         )
         db.commit()
     finally:
         db.close()
+    return username
 
 
 def test_dashboard_shows_three_cards_anonymously():
@@ -417,27 +376,13 @@ def test_dashboard_shows_three_cards_anonymously():
             assert f'data-future-route="{route}"' not in article, title
         else:
             assert re.search(rf'<a\b[^>]*data-future-route="{re.escape(route)}"', article), title
-        # Light theme: pure white cards, subtle border/shadow, no glassmorphism.
+        # White cards, subtle border/shadow, no glassmorphism.
         for token in ("bg-white", "rounded-2xl", "border-gray-200", "shadow-"):
             assert token in article, (title, token)
         assert "backdrop-blur" not in article, title
 
     # The Fleet card is not merely hidden: it must not be in the DOM.
     assert FLEET_TITLE not in body
-
-
-def test_dashboard_grid_and_container():
-    body = _client().get("/dashboard").text
-    for token in ("grid-cols-1", "sm:grid-cols-2", "lg:grid-cols-4"):
-        assert token in body, token
-    # D2 = A: the dashboard overrides the default shell width.
-    assert "max-w-6xl" in body
-
-    # Auth pages must keep the narrow default.
-    for path in ("/auth/login", "/auth/register"):
-        auth_body = _client().get(path).text
-        assert "max-w-md" in auth_body, path
-        assert "max-w-6xl" not in auth_body, path
 
 
 def test_dashboard_header_single_h1_generic_greeting_and_logout():
@@ -466,14 +411,26 @@ def test_dashboard_ignores_invalid_cookie():
 
 @requires_postgres
 @pytest.mark.parametrize("role", ["driver", "shipper", "carrier", "admin"])
-def test_dashboard_role_identity(role):
+def test_dashboard_role_identity(role, admin_code):
     Base.metadata.create_all(bind=engine)
-    phone = _new_phone()
+    phone = new_phone()
     name = f"کاربر {role}"
-    _create_user(phone, name, role)
+    username = _create_user(phone, name, role)
     try:
         client = _client(follow_redirects=False)
-        login = client.post("/auth/login", data={"phone": phone, "password": PASSWORD})
+        if role == "admin":
+            login = client.post(
+                "/auth/admin/login",
+                data={
+                    "username": username,
+                    "password": PASSWORD,
+                    "admin_code": admin_code,
+                },
+            )
+        else:
+            login = client.post(
+                "/auth/login", data={"phone": phone, "password": PASSWORD}
+            )
         assert login.status_code == 303, login.text
 
         body = client.get("/dashboard").text
@@ -491,4 +448,4 @@ def test_dashboard_role_identity(role):
         # Fleet: carrier and admin see it; driver and shipper never do.
         assert (FLEET_TITLE in body) is (role in FLEET_ROLES), role
     finally:
-        _cleanup(phone)
+        _cleanup(phone, usernames=(username,) if username else ())

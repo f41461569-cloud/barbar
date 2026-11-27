@@ -1,7 +1,7 @@
 # PLAN: Registration v2 — Landing, Role-Specific Forms, Admin Code, and Test Migration
 
 ## Status
-In progress — 2026-11-27. Approved:
+Implemented — 2026-11-27 (see “Implementation record” at the end). Approved:
 
 1. `docs/SPEC-registration-v2.md` (including decisions D1–D10),
 2. `docs/adr/007-registration-v2-user-model.md`,
@@ -471,6 +471,42 @@ venv\Scripts\uvicorn.exe app.main:app --reload --host 127.0.0.1 --port 8000
       dashboards, or public pages.
 - [ ] Manual QA matrix passed; no horizontal scroll at 320–1440 px; keyboard/JS-disabled checks pass.
 - [ ] This plan is marked Implemented with recorded RED/GREEN counts, migration output, and QA results.
+
+## Implementation record (2026-11-27)
+
+TDD cycles and results:
+
+| Cycle | RED reason observed | GREEN result |
+|---|---|---|
+| Validation + service | `ModuleNotFoundError: No module named 'app.auth.service'` | 188-line unit module passes on SQLite |
+| Model/constraints | `AttributeError: Settings has no attribute 'ADMIN_CODE'`; missing `User` columns | model + index tests pass on PostgreSQL |
+| Routes/behaviour | `AttributeError` on `settings.ADMIN_CODE`, 404 for `/auth/register/driver` | `tests/test_auth.py` green |
+| UI/markup | 404/missing templates for the five new pages | `tests/test_registration_ui.py` green |
+| Concurrency | endpoint absent | 1 success + 1 `409`, one row; 10/10 repeated runs green |
+
+Suites:
+
+- SQLite (`DATABASE_URL` unset): **135 passed, 142 skipped**, 0 failed. The skips are the
+  PostgreSQL-gated DB/concurrency modules.
+- PostgreSQL (`smart_freight_test`): **277 passed, 0 failed** (the pre-v2 139 tests are preserved or
+  intentionally migrated per the table above; no assertion was dropped).
+- `tests/test_registration_concurrency.py`: 10 consecutive green runs.
+
+Migrations:
+
+- New revision `3c0fb3fec533_registration_v2_user_model` (down from `cc9ac3ac14f8`).
+- Scratch PostgreSQL DB: `upgrade head` → `alembic check` (no new operations) → `downgrade -1` →
+  `upgrade head`, all successful.
+- Dev SQLite `barbar_smart.db` upgraded to `3c0fb3fec533`; `alembic check` clean. A pre-migration
+  copy was written to the system temp folder.
+
+Notes and limits:
+
+- `ADMIN_CODE` has no default; the running dev server uses a local development value only.
+- The manual QA matrix (responsive widths, keyboard order, 200% zoom, JS-disabled, console error
+  sweep) was **not executed**; the pages were only fetched to confirm `200` responses and the dev
+  server preview was opened on `/auth/register`.
+- Supersession notes added to `docs/SPEC-auth.md` and `docs/SPEC-ui.md`.
 
 ## Follow-ups (not in this plan)
 

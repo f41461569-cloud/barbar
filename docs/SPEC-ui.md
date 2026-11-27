@@ -1,6 +1,11 @@
 # SPEC: Login / Registration UI Redesign (Tailwind + RTL Glassmorphism)
 
 ## Status
+
+> **Superseded (2026-11-27) for auth pages:** the login/registration visuals are now specified by
+> `docs/SPEC-registration-v2.md` §10 (navy `#0a192f` / yellow `#fbbf24` / white). The accessibility
+> rules below still apply.
+
 Approved (2026-11-22). Decision **D1 = Option A** approved: on 401/409 the POST handlers re-render the
 same template with a styled `error` and the same status code. Approved defaults: shared
 `templates/base.html`, «باربری هوشمند» brand row with truck icon, Tailwind Play CDN pinned at `3.4.17`.

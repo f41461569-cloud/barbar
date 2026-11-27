@@ -44,42 +44,42 @@
   <div>
     <label for="origin" class="mb-1 block text-xs font-medium text-gray-700">مبدأ</label>
     <input id="origin" name="origin" type="text" value="{{ filters.origin }}" maxlength="200"
-           class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500">
+           class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-[#fbbf24] focus:outline-none focus:ring-2 focus:ring-[#fbbf24]/40">
   </div>
   <div>
     <label for="destination" class="mb-1 block text-xs font-medium text-gray-700">مقصد</label>
     <input id="destination" name="destination" type="text" value="{{ filters.destination }}" maxlength="200"
-           class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500">
+           class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-[#fbbf24] focus:outline-none focus:ring-2 focus:ring-[#fbbf24]/40">
   </div>
   <div class="grid grid-cols-2 gap-2">
     <div>
       <label for="min_weight" class="mb-1 block text-xs font-medium text-gray-700">وزن از (kg)</label>
       <input id="min_weight" name="min_weight" type="number" min="0" step="any" value="{{ filters.min_weight }}"
-             class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500">
+             class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-[#fbbf24] focus:outline-none focus:ring-2 focus:ring-[#fbbf24]/40">
     </div>
     <div>
       <label for="max_weight" class="mb-1 block text-xs font-medium text-gray-700">تا</label>
       <input id="max_weight" name="max_weight" type="number" min="0" step="any" value="{{ filters.max_weight }}"
-             class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500">
+             class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-[#fbbf24] focus:outline-none focus:ring-2 focus:ring-[#fbbf24]/40">
     </div>
   </div>
   <div class="grid grid-cols-2 gap-2">
     <div>
       <label for="min_price" class="mb-1 block text-xs font-medium text-gray-700">قیمت از (تومان)</label>
       <input id="min_price" name="min_price" type="number" min="0" step="any" value="{{ filters.min_price }}"
-             class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500">
+             class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-[#fbbf24] focus:outline-none focus:ring-2 focus:ring-[#fbbf24]/40">
     </div>
     <div>
       <label for="max_price" class="mb-1 block text-xs font-medium text-gray-700">تا</label>
       <input id="max_price" name="max_price" type="number" min="0" step="any" value="{{ filters.max_price }}"
-             class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500">
+             class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-[#fbbf24] focus:outline-none focus:ring-2 focus:ring-[#fbbf24]/40">
     </div>
   </div>
   {% if current_user and current_user.role.value == "admin" %}
   <div>
     <label for="status" class="mb-1 block text-xs font-medium text-gray-700">وضعیت</label>
     <select id="status" name="status"
-            class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500">
+            class="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-[#fbbf24] focus:outline-none focus:ring-2 focus:ring-[#fbbf24]/40">
       <option value="available" {% if active_status == "available" %}selected{% endif %}>آماده رزرو</option>
       <option value="booked" {% if active_status == "booked" %}selected{% endif %}>رزرو شده</option>
       <option value="all" {% if active_status == "all" %}selected{% endif %}>همه</option>
@@ -88,7 +88,7 @@
   {% endif %}
   <div class="flex items-end">
     <button type="submit"
-            class="w-full rounded-xl border border-violet-200 bg-violet-50 px-4 py-2.5 text-sm font-bold text-violet-700 transition-colors hover:bg-violet-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2">
+            class="w-full rounded-xl border border-[#fbbf24] bg-[#fbbf24]/10 px-4 py-2.5 text-sm font-bold text-[#0a192f] transition-colors hover:bg-[#fbbf24]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fbbf24] focus-visible:ring-offset-2">
       فیلتر
     </button>
   </div>
@@ -124,7 +124,7 @@
     {% if is_driver and is_verified and cargo.status == "available" %}
     <form method="post" action="/cargos/{{ cargo.id }}/book" data-guard data-busy-text="در حال رزرو…" class="mt-auto pt-4">
       <button type="submit"
-              class="inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-violet-600 to-pink-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-pink-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2 focus-visible:ring-offset-white active:translate-y-0 motion-reduce:transform-none motion-reduce:transition-none">
+              class="inline-flex w-full items-center justify-center rounded-xl bg-[#fbbf24] px-4 py-2.5 text-sm font-bold text-gray-900 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fbbf24] focus-visible:ring-offset-2 focus-visible:ring-offset-white active:translate-y-0 motion-reduce:transform-none motion-reduce:transition-none">
         رزرو
       </button>
     </form>
@@ -139,7 +139,7 @@
 {% endif %}
 
 <a href="/dashboard"
-   class="mt-6 inline-flex text-sm font-medium text-violet-700 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2">
+   class="mt-6 inline-flex text-sm font-medium text-[#0a192f] underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fbbf24] focus-visible:ring-offset-2">
   بازگشت به داشبورد
 </a>
 {% endblock %}

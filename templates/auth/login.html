@@ -1,51 +1,31 @@
 {% extends "base.html" %}
+{% from "macros/forms.html" import field, alert, primary_button, link_on_card, link_on_navy %}
 
-{% block title %}ورود — باربری هوشمند{% endblock %}
+{% block title %}ورود — باربر هوشمند{% endblock %}
 
 {% block card %}
-<h1 class="mb-1 text-center text-2xl font-bold text-gray-800">ورود</h1>
-<p class="mb-6 text-center text-sm text-gray-500">برای مدیریت بار و نوبت‌ها وارد شوید.</p>
+{% set v = values|default({}, true) %}
 
-{% if error %}
-<div id="form-error" role="alert" aria-live="assertive"
-     class="mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-  <svg class="mt-0.5 h-5 w-5 shrink-0 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-       stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path>
-  </svg>
-  <p class="break-words leading-6">{{ error }}</p>
-</div>
-{% endif %}
+<h1 class="text-center text-2xl font-bold text-[#0a192f]">ورود</h1>
+<p class="mb-6 mt-1 text-center text-sm text-slate-500">برای مدیریت بار و نوبت‌ها وارد شوید.</p>
+
+{% if error %}{{ alert(error) }}{% endif %}
 
 <form method="post" action="/auth/login" data-guard class="space-y-4">
-  <div>
-    <label for="phone" class="mb-2 block text-sm font-medium text-gray-700">شماره تلفن</label>
-    <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="username"
-           dir="ltr" required placeholder="09xxxxxxxxx"
-           value="{{ phone|default('', true) }}"
-           {% if error %}aria-invalid="true" aria-describedby="form-error"{% endif %}
-           class="w-full rounded-xl border bg-white px-4 py-3 text-left text-base text-gray-800 shadow-sm placeholder:text-gray-400 focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30{% if error %} border-red-300{% else %} border-gray-300{% endif %}">
-  </div>
+  {{ field("phone", "شماره تلفن", "phone", type="tel", value=v.phone, error=None,
+           ltr=true, inputmode="tel", autocomplete="username", placeholder="09xxxxxxxxx",
+           described_by="form-error" if error else None) }}
+  {{ field("password", "رمز عبور", "lock", type="password",
+           ltr=true, autocomplete="current-password", placeholder="••••••••",
+           described_by="form-error" if error else None) }}
 
-  <div>
-    <label for="password" class="mb-2 block text-sm font-medium text-gray-700">رمز عبور</label>
-    <input id="password" name="password" type="password" autocomplete="current-password"
-           dir="ltr" required placeholder="••••••••"
-           {% if error %}aria-invalid="true" aria-describedby="form-error"{% endif %}
-           class="w-full rounded-xl border bg-white px-4 py-3 text-left text-base text-gray-800 shadow-sm placeholder:text-gray-400 focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30{% if error %} border-red-300{% else %} border-gray-300{% endif %}">
-  </div>
-
-  <button type="submit" data-busy-text="در حال ورود…"
-          class="w-full rounded-xl bg-gradient-to-r from-violet-600 to-pink-600 px-4 py-3 text-base font-bold text-white shadow-lg shadow-pink-500/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-pink-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2 focus-visible:ring-offset-white active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transform-none motion-reduce:transition-none">
-    وارد شوید
-  </button>
+  {{ primary_button("ورود", "در حال ورود…") }}
 </form>
 {% endblock %}
 
 {% block footer %}
-<p class="mt-6 text-center text-sm text-gray-500">
-  حساب ندارید؟
-  <a href="/auth/register"
-     class="rounded font-medium text-violet-700 underline decoration-violet-300 underline-offset-4 hover:text-violet-800 hover:decoration-violet-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2 focus-visible:ring-offset-white">ثبت نام کنید</a>
-</p>
+<div class="mt-6 space-y-2 text-center text-sm text-slate-300">
+  <p>حساب ندارید؟ {{ link_on_navy("/auth/register", "ثبت‌نام کنید") }}</p>
+  <p>{{ link_on_navy("/auth/admin/login", "ورود مدیران") }}</p>
+</div>
 {% endblock %}

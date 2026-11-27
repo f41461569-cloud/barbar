@@ -70,11 +70,13 @@ def shipper_payload(**overrides) -> dict[str, str]:
     return data
 
 
-def admin_payload(admin_code: str, **overrides) -> dict[str, str]:
+def admin_payload(code: str, **overrides) -> dict[str, str]:
+    """Admin form payload; ``admin_code=`` in overrides replaces ``code``."""
+
     data = {
         "username": new_username(),
         "password": PASSWORD,
-        "admin_code": admin_code,
+        "admin_code": code,
     }
     data.update(overrides)
     return data

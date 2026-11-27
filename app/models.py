@@ -25,11 +25,28 @@ class UserRole(str, enum.Enum):
 
 class User(Base):
     __tablename__ = "users"
+    # Registration v2 (ADR 007): profile columns are nullable so legacy users and
+    # direct-insert fixtures keep working; admins have no phone.
+    __table_args__ = (
+        Index("ix_users_username", "username", unique=True),
+        Index("ix_users_national_id", "national_id", unique=True),
+        Index("ix_users_license_number", "license_number", unique=True),
+        Index("ix_users_plate_number", "plate_number", unique=False),
+    )
+
     id: Mapped[int] = mapped_column(primary_key=True)
-    phone: Mapped[str] = mapped_column(String(20), unique=True, index=True)
+    phone: Mapped[str] = mapped_column(
+        String(20), unique=True, index=True, nullable=True
+    )
     name: Mapped[str] = mapped_column(String(100))
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[UserRole] = mapped_column(Enum(UserRole))
+    username: Mapped[str] = mapped_column(String(50), nullable=True)
+    national_id: Mapped[str] = mapped_column(String(10), nullable=True)
+    license_number: Mapped[str] = mapped_column(String(30), nullable=True)
+    truck_type: Mapped[str] = mapped_column(String(20), nullable=True)
+    plate_number: Mapped[str] = mapped_column(String(20), nullable=True)
+    cargo_type_preference: Mapped[str] = mapped_column(String(20), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 

@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
-  <title>{% block title %}باربری هوشمند{% endblock %}</title>
+  <title>{% block title %}باربر هوشمند{% endblock %}</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
 
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script>
@@ -23,29 +23,29 @@
     };
   </script>
 
-  {# FOUC guard only: keeps the page light and in Vazirmatn until Tailwind compiles in the browser. #}
-  <style>html{background:#ffffff}body{font-family:'Vazirmatn',Tahoma,Arial,sans-serif;color:#1f2937}</style>
+  {# FOUC guard only: keeps the navy background and Vazirmatn until Tailwind compiles. #}
+  <style>html{background:#0a192f}body{font-family:'Vazirmatn',Tahoma,Arial,sans-serif;color:#0f172a}</style>
   {% block head %}{% endblock %}
 </head>
-<body class="flex min-h-screen items-center justify-center bg-gradient-to-br from-pink-50 via-white to-violet-100 p-4 font-vazir text-gray-800 antialiased">
-  <div aria-hidden="true" class="pointer-events-none fixed inset-0 overflow-hidden">
-    <div class="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-pink-200/40 blur-3xl"></div>
-    <div class="absolute -bottom-32 -left-24 h-80 w-80 rounded-full bg-emerald-200/40 blur-3xl"></div>
-    <div class="absolute left-1/3 top-1/3 h-72 w-72 rounded-full bg-violet-200/40 blur-3xl"></div>
-  </div>
-
-  <main class="relative w-full {% block main_class %}max-w-md{% endblock %}">
-    <section class="rounded-2xl border border-gray-200 bg-white p-6 shadow-xl shadow-gray-200/50 sm:p-8">
-      <div data-brand="smart-freight" class="mb-6 flex items-center justify-center gap-2 text-lg font-bold text-gray-800">
-        <svg class="h-6 w-6 text-violet-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+<body class="flex min-h-screen flex-col bg-gradient-to-b from-[#0a192f] to-[#112240] font-vazir antialiased">
+  <header class="w-full bg-[#0a192f] border-b border-white/10">
+    <div class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4">
+      <div data-brand="smart-freight" class="flex items-center gap-2 text-lg font-bold text-white">
+        <svg class="h-8 w-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M3 16V6a1 1 0 0 1 1-1h9v11"></path>
           <path d="M13 9h4l4 4v3h-8"></path>
           <circle cx="7" cy="17" r="2"></circle>
           <circle cx="17" cy="17" r="2"></circle>
         </svg>
-        <span>باربری هوشمند</span>
+        <span>باربر هوشمند</span>
       </div>
+      {% block header_action %}{% endblock %}
+    </div>
+  </header>
+
+  <main class="mx-auto w-full flex-1 px-4 py-8 sm:py-12 {% block main_class %}max-w-md{% endblock %}">
+    <section class="{% block card_class %}rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl shadow-black/20 sm:p-8{% endblock %}">
       {% block card %}{% endblock %}
     </section>
     {% block footer %}{% endblock %}

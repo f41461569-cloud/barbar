@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% from "macros/forms.html" import field, alert, primary_button, link_on_navy %}
+
+{% block title %}ثبت‌نام مدیر سیستم — باربر هوشمند{% endblock %}
+
+{% block card %}
+{% set v = values|default({}, true) %}
+{% set errs = errors|default({}, true) %}
+
+<h1 class="text-center text-2xl font-bold text-[#0a192f]">ثبت‌نام مدیر سیستم</h1>
+<p class="mb-6 mt-1 text-center text-sm text-slate-500">این بخش فقط با کد مدیریت قابل استفاده است.</p>
+
+{% if error %}{{ alert(error) }}{% endif %}
+
+<form method="post" action="/auth/register/admin" data-guard class="space-y-4">
+  {{ field("username", "نام کاربری", "user", value=v.username, error=errs.username,
+           ltr=true, autocomplete="username", placeholder="admin") }}
+  {{ field("password", "رمز عبور", "lock", type="password", error=errs.password,
+           ltr=true, autocomplete="new-password", placeholder="••••••••") }}
+  {{ field("admin_code", "کد مدیریت", "shield", type="password", error=errs.admin_code,
+           ltr=true, autocomplete="off", placeholder="••••••••") }}
+
+  {{ primary_button("ساخت حساب مدیر", "در حال ساخت حساب…") }}
+</form>
+{% endblock %}
+
+{% block footer %}
+<div class="mt-6 space-y-2 text-center text-sm text-slate-300">
+  <p>{{ link_on_navy("/auth/admin/login", "ورود مدیران") }}</p>
+  <p>{{ link_on_navy("/auth/register", "بازگشت به انتخاب نقش") }}</p>
+</div>
+{% endblock %}

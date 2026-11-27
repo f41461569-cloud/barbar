@@ -5,7 +5,7 @@
 {% block main_class %}max-w-6xl{% endblock %}
 
 {% block card %}
-{% set input_class = "w-full rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-800 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500" %}
+{% set input_class = "w-full rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-800 focus:border-[#fbbf24] focus:outline-none focus:ring-2 focus:ring-[#fbbf24]/40" %}
 
 <header>
   <h1 class="text-2xl font-bold text-gray-800">ثبت بار جدید</h1>
@@ -70,14 +70,14 @@
 
   <div class="sm:col-span-2">
     <button type="submit"
-            class="inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-violet-600 to-pink-600 px-4 py-3 text-base font-bold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-pink-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2 focus-visible:ring-offset-white active:translate-y-0 motion-reduce:transform-none motion-reduce:transition-none sm:w-auto">
+            class="inline-flex w-full items-center justify-center rounded-xl bg-[#fbbf24] px-4 py-3 text-base font-bold text-gray-900 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fbbf24] focus-visible:ring-offset-2 focus-visible:ring-offset-white active:translate-y-0 motion-reduce:transform-none motion-reduce:transition-none sm:w-auto">
       ثبت بار
     </button>
   </div>
 </form>
 
 <a href="/shipper/cargos"
-   class="mt-6 inline-flex text-sm font-medium text-violet-700 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2">
+   class="mt-6 inline-flex text-sm font-medium text-[#0a192f] underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fbbf24] focus-visible:ring-offset-2">
   بازگشت به بارهای من
 </a>
 {% endblock %}

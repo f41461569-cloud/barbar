@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% from "macros/forms.html" import field, select_field, alert, primary_button, link_on_card, link_on_navy %}
+
+{% block title %}ثبت‌نام راننده — باربر هوشمند{% endblock %}
+
+{% block card %}
+{% set v = values|default({}, true) %}
+{% set errs = errors|default({}, true) %}
+
+<h1 class="text-center text-2xl font-bold text-[#0a192f]">ثبت‌نام راننده</h1>
+<p class="mb-6 mt-1 text-center text-sm text-slate-500">اطلاعات هویتی و خودروی خود را وارد کنید.</p>
+
+{% if error %}{{ alert(error) }}{% endif %}
+
+<form method="post" action="/auth/register/driver" data-guard class="space-y-4">
+  {{ field("full_name", "نام و نام خانوادگی", "user", value=v.full_name, error=errs.full_name,
+           autocomplete="name", placeholder="نام و نام خانوادگی") }}
+  {{ field("phone", "شماره تلفن", "phone", type="tel", value=v.phone, error=errs.phone,
+           ltr=true, inputmode="tel", autocomplete="tel", placeholder="09xxxxxxxxx") }}
+  {{ field("national_id", "کد ملی", "id-card", value=v.national_id, error=errs.national_id,
+           ltr=true, inputmode="numeric", maxlength="10", placeholder="۱۰ رقم") }}
+  {{ field("license_number", "شماره گواهینامه", "license", value=v.license_number,
+           error=errs.license_number, ltr=true, autocomplete="off") }}
+  {{ select_field("truck_type", "نوع خودرو", "truck", truck_options,
+                  value=v.truck_type, error=errs.truck_type) }}
+  {{ field("plate_number", "شماره پلاک", "plate", value=v.plate_number, error=errs.plate_number,
+           autocomplete="off", placeholder="۱۲ ب ۳۴۵ ایران ۶۷") }}
+  {{ field("password", "رمز عبور", "lock", type="password", error=errs.password,
+           ltr=true, autocomplete="new-password", placeholder="••••••••") }}
+
+  {{ primary_button("ثبت‌نام راننده", "در حال ثبت‌نام…") }}
+</form>
+{% endblock %}
+
+{% block footer %}
+<div class="mt-6 space-y-2 text-center text-sm text-slate-300">
+  <p>حساب دارید؟ {{ link_on_navy("/auth/login", "وارد شوید") }}</p>
+  <p>{{ link_on_navy("/auth/register", "بازگشت به انتخاب نقش") }}</p>
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% from "macros/forms.html" import field, alert, primary_button, link_on_navy %}
+
+{% block title %}ورود مدیران — باربر هوشمند{% endblock %}
+
+{% block card %}
+{% set v = values|default({}, true) %}
+
+<h1 class="text-center text-2xl font-bold text-[#0a192f]">ورود مدیران</h1>
+<p class="mb-6 mt-1 text-center text-sm text-slate-500">این صفحه مخصوص مدیران سیستم است.</p>
+
+{% if error %}{{ alert(error) }}{% endif %}
+
+<form method="post" action="/auth/admin/login" data-guard class="space-y-4">
+  {{ field("username", "نام کاربری", "user", value=v.username,
+           ltr=true, autocomplete="username", placeholder="admin") }}
+  {{ field("password", "رمز عبور", "lock", type="password",
+           ltr=true, autocomplete="current-password", placeholder="••••••••") }}
+  {{ field("admin_code", "کد مدیریت", "shield", type="password",
+           ltr=true, autocomplete="off", placeholder="••••••••") }}
+  <p class="text-xs leading-5 text-slate-500">
+    مدیران قدیمی می‌توانند به‌جای نام کاربری، شماره تلفن خود را وارد کنند.
+  </p>
+
+  {{ primary_button("ورود مدیران", "در حال ورود…") }}
+</form>
+{% endblock %}
+
+{% block footer %}
+<div class="mt-6 space-y-2 text-center text-sm text-slate-300">
+  <p>{{ link_on_navy("/auth/login", "ورود کاربران") }}</p>
+  <p>{{ link_on_navy("/auth/register", "بازگشت به انتخاب نقش") }}</p>
+</div>
+{% endblock %}

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}داشبورد — باربری هوشمند{% endblock %}
+{% block title %}داشبورد — باربر هوشمند{% endblock %}
 
 {% block main_class %}max-w-6xl{% endblock %}
 
@@ -17,9 +17,9 @@
   "carrier": "border-purple-200 bg-purple-50 text-purple-700",
   "admin": "border-orange-200 bg-orange-50 text-orange-700"
 } %}
-{% set cta_class = "mt-auto inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-pink-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-pink-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2 focus-visible:ring-offset-white active:translate-y-0 motion-reduce:transform-none motion-reduce:transition-none" %}
+{% set cta_class = "mt-auto inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#fbbf24] px-4 py-2.5 text-sm font-bold text-gray-900 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fbbf24] focus-visible:ring-offset-2 focus-visible:ring-offset-white active:translate-y-0 motion-reduce:transform-none motion-reduce:transition-none" %}
 {% set card_class = "flex h-full flex-col rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-shadow duration-200 hover:shadow-md motion-reduce:transition-none" %}
-{% set icon_tile_class = "mb-3 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 text-violet-600" %}
+{% set icon_tile_class = "mb-3 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[#fbbf24]/10 text-[#0a192f]" %}
 
 <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
   <div class="max-w-md">
@@ -31,7 +31,7 @@
         {{ role_labels.get(current_user.role.value, current_user.role.value) }}
       </span>
     {% else %}
-      <h1 class="mt-1 text-2xl font-bold text-gray-800">به باربری هوشمند خوش آمدید.</h1>
+      <h1 class="mt-1 text-2xl font-bold text-[#0a192f]">به باربر هوشمند خوش آمدید.</h1>
     {% endif %}
   </div>
 

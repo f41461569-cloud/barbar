@@ -3,6 +3,9 @@
 ## Status
 Approved
 
+> **Superseded (2026-11-27):** registration/login *page behaviour and routes* are now specified by
+> `docs/SPEC-registration-v2.md`. This document is kept as the ADR 003/004 baseline.
+
 ## Context
 The platform currently has a `users` table with `phone`, `name`, `role`, and `created_at`, but no way to
 authenticate. We need HTML forms served by FastAPI/Jinja2 for registration and login, with a JWT

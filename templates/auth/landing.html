@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% from "macros/forms.html" import link_on_navy %}
+
+{% block title %}ثبت‌نام — باربر هوشمند{% endblock %}
+{% block main_class %}max-w-5xl{% endblock %}
+{% block card_class %}border-0 bg-transparent p-0 shadow-none{% endblock %}
+
+{% block header_action %}
+<a href="/auth/login" data-header-action="login"
+   class="rounded-xl border border-[#fbbf24] px-4 py-2 text-sm font-bold text-[#fbbf24] transition-colors hover:bg-[#fbbf24] hover:text-[#0a192f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fbbf24] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a192f]">ورود</a>
+{% endblock %}
+
+{% block card %}
+<div class="text-center">
+  <h1 class="text-2xl font-extrabold text-white sm:text-3xl">ثبت‌نام در باربر هوشمند</h1>
+  <p class="mt-2 text-sm text-slate-300">نقش خود را انتخاب کنید و حساب کاربری بسازید.</p>
+</div>
+
+<div class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+  <a data-role-card="driver" href="/auth/register/driver"
+     class="group flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl shadow-black/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-black/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fbbf24] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a192f] motion-reduce:transform-none motion-reduce:transition-none">
+    <span class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[#fbbf24] text-[#0a192f]">
+      <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 16V6a1 1 0 0 1 1-1h9v11"></path>
+        <path d="M13 9h4l4 4v3h-8"></path>
+        <circle cx="7" cy="17" r="2"></circle>
+        <circle cx="17" cy="17" r="2"></circle>
+      </svg>
+    </span>
+    <h2 class="mt-4 text-lg font-bold text-[#0a192f]">راننده</h2>
+    <p class="mt-1 text-sm leading-6 text-slate-500">مدیریت بار، نوبت و بارنامه</p>
+    <span class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-[#0a192f]">
+      شروع
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
+    </span>
+  </a>
+
+  <a data-role-card="shipper" href="/auth/register/shipper"
+     class="group flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl shadow-black/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-black/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fbbf24] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a192f] motion-reduce:transform-none motion-reduce:transition-none">
+    <span class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[#fbbf24] text-[#0a192f]">
+      <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 8.5 12 3 3 8.5v7L12 21l9-5.5v-7Z"></path>
+        <path d="m3 8.5 9 5 9-5"></path>
+        <path d="M12 13.5V21"></path>
+      </svg>
+    </span>
+    <h2 class="mt-4 text-lg font-bold text-[#0a192f]">صاحب کالا / انبار</h2>
+    <p class="mt-1 text-sm leading-6 text-slate-500">ثبت بار و مدیریت محموله‌ها</p>
+    <span class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-[#0a192f]">
+      شروع
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
+    </span>
+  </a>
+
+  <a data-role-card="admin" href="/auth/register/admin"
+     class="group flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl shadow-black/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-black/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fbbf24] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a192f] motion-reduce:transform-none motion-reduce:transition-none">
+    <span class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[#fbbf24] text-[#0a192f]">
+      <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6l7-3Z"></path>
+        <path d="m9 12 2 2 4-4"></path>
+      </svg>
+    </span>
+    <h2 class="mt-4 text-lg font-bold text-[#0a192f]">مدیر سیستم</h2>
+    <p class="mt-1 text-sm leading-6 text-slate-500">بررسی مدارک و مدیریت سامانه</p>
+    <span class="mt-4 inline-flex items-center gap-1 text-sm font-bold text-[#0a192f]">
+      شروع
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
+    </span>
+  </a>
+</div>
+{% endblock %}
+
+{% block footer %}
+<p class="mt-8 text-center text-sm text-slate-300">
+  حساب دارید؟ {{ link_on_navy("/auth/login", "وارد شوید") }}
+</p>
+{% endblock %}
